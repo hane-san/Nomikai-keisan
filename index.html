@@ -1,0 +1,1568 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>割り勘ジャングル</title>
+<style>
+  :root{
+    --bg1:#0a2a20;
+    --bg2:#124633;
+    --bg3:#25734e;
+    --leaf:#3fa56b;
+    --leaf2:#7bd08e;
+    --sand:#fff5d7;
+    --sand2:#ffebb0;
+    --sun:#ffd45e;
+    --coral:#ff7a66;
+    --cream:#fffdf5;
+    --panel:#f6ffef;
+    --ink:#214536;
+    --muted:#55806a;
+    --line:rgba(34,93,67,.16);
+    --shadow:rgba(6,28,20,.22);
+    --digit:"Avenir Next","DIN Alternate","Roboto Condensed","Helvetica Neue",Arial,sans-serif;
+    --sans:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --money-size:clamp(25px,6.7vw,32px);
+    --keypad-h:68px;
+    --panel-h:58px;
+  }
+
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;width:100%;height:100%;}
+  body{
+    min-height:100svh;
+    overflow:hidden;
+    padding:8px 8px calc(var(--keypad-h) + 8px + env(safe-area-inset-bottom));
+    color:var(--ink);
+    font-family:var(--sans);
+    letter-spacing:.005em;
+    font-variant-numeric:tabular-nums;
+    font-feature-settings:"tnum" 1,"zero" 1;
+    background:
+      radial-gradient(circle at 8% -6%, rgba(255,232,124,.18) 0 14%, transparent 36%),
+      radial-gradient(circle at 96% 4%, rgba(255,122,102,.16) 0 12%, transparent 30%),
+      radial-gradient(circle at 88% 105%, rgba(123,208,142,.18) 0 24%, transparent 46%),
+      linear-gradient(160deg,var(--bg1) 0%, var(--bg2) 34%, var(--bg3) 100%);
+  }
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    pointer-events:none;
+    opacity:.22;
+    background:
+      radial-gradient(160px 280px at -2% 22%, rgba(255,255,255,.16) 0 20%, transparent 22%),
+      radial-gradient(180px 320px at 102% 16%, rgba(255,255,255,.14) 0 18%, transparent 20%),
+      radial-gradient(120px 220px at 14% 88%, rgba(255,255,255,.12) 0 18%, transparent 20%);
+    filter:blur(2px);
+  }
+
+  .num,input,button,.moneyValue,.smallMoney,#roundNow,.collectFrac,.memoStatFrac{
+    font-family:var(--digit);
+    font-variant-numeric:tabular-nums;
+    font-feature-settings:"tnum" 1,"zero" 1;
+  }
+
+  .app{
+    position:relative; z-index:1;
+    width:min(430px,100%);
+    height:calc(100svh - var(--keypad-h) - 16px - env(safe-area-inset-bottom));
+    margin:0 auto;
+    display:grid;
+    grid-template-rows:auto minmax(0,1fr) auto auto;
+    gap:8px;
+  }
+
+  .topInputs{
+    display:grid;
+    grid-template-columns:minmax(0,1.04fr) minmax(0,.86fr) 54px;
+    gap:8px;
+  }
+  .field{
+    min-width:0;
+    padding:8px 10px 9px;
+    border-radius:20px;
+    border:1px solid rgba(255,255,255,.55);
+    background:linear-gradient(180deg, rgba(249,255,246,.98), rgba(230,249,231,.95));
+    box-shadow:0 9px 20px var(--shadow), inset 0 1px 0 rgba(255,255,255,.92);
+  }
+  .fieldHeader{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:4px;
+    color:#44745d; font-size:10px; font-weight:800; letter-spacing:.04em;
+  }
+  .moneyInput{
+    width:100%;
+    border:0; outline:0; background:transparent;
+    color:var(--coral);
+    font-size:var(--money-size);
+    font-weight:780;
+    text-align:right;
+    letter-spacing:.015em;
+    line-height:1;
+    caret-color:var(--coral);
+  }
+
+  .fundField .moneyInput{
+    min-width:0;
+  }
+  .lockButton{
+    width:100%;
+    height:100%;
+    min-height:72px;
+    border:1px solid rgba(255,255,255,.55);
+    border-radius:20px;
+    background:
+      radial-gradient(circle at 20% 0%,rgba(255,255,255,.55),transparent 42%),
+      linear-gradient(180deg,#fffef2,#dff5d8);
+    color:#236044;
+    box-shadow:0 9px 20px var(--shadow), inset 0 1px 0 rgba(255,255,255,.92);
+    font:850 23px/1 var(--sans);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:transform .08s ease, filter .12s ease, background .12s ease, box-shadow .12s ease;
+  }
+  .lockButton:active{
+    transform:scale(.94);
+    filter:brightness(1.04);
+  }
+  .lockButton.on{
+    background:
+      radial-gradient(circle at 20% 0%,rgba(255,255,255,.45),transparent 42%),
+      linear-gradient(180deg,#ffe889,#ffb06a);
+    color:#6b3b24;
+    border-color:rgba(255,176,106,.55);
+    box-shadow:0 10px 22px rgba(88,47,24,.16), inset 0 1px 0 rgba(255,255,255,.8);
+  }
+  .lockedControl,
+  input.lockedControl,
+  .lockedControl input{
+    opacity:.68;
+  }
+  input:disabled{
+    -webkit-text-fill-color:currentColor;
+    color:inherit;
+  }
+  input[type="range"]:disabled{
+    opacity:.54;
+  }
+
+  .field.activeInput,
+  .field:focus-within,
+  .peopleChip.activeInput,
+  .peopleChip:focus-within{
+    border-color:rgba(255,212,94,.92);
+    box-shadow:0 0 0 3px rgba(255,212,94,.18), 0 10px 22px var(--shadow), inset 0 1px 0 rgba(255,255,255,.9);
+  }
+
+  .cards{
+    min-height:0;
+    display:grid;
+    grid-template-rows:repeat(3,minmax(0,1fr));
+    gap:8px;
+  }
+  .card, .totalCard{
+    min-height:0;
+    overflow:hidden;
+    position:relative;
+    padding:8px;
+    border-radius:22px;
+    border:1px solid rgba(255,255,255,.52);
+    background:
+      radial-gradient(circle at 100% 0%, rgba(255,232,124,.22) 0 18%, transparent 40%),
+      radial-gradient(circle at 0 100%, rgba(255,255,255,.26) 0 16%, transparent 38%),
+      linear-gradient(180deg, rgba(250,255,246,.98), rgba(229,250,228,.96));
+    box-shadow:0 10px 22px var(--shadow), inset 0 1px 0 rgba(255,255,255,.95);
+  }
+  .card::before, .totalCard::before{
+    content:"";
+    position:absolute; left:0; top:0; bottom:0; width:6px;
+    border-radius:6px;
+    background:linear-gradient(180deg,#ffe56e 0%, #ff9f57 44%, #267851 100%);
+  }
+  .card[data-group="monkey"]::before{ background:linear-gradient(180deg,#ffea72 0%, #ffc85d 44%, #24915d 100%); }
+  .card[data-group="butterfly"]::before{ background:linear-gradient(180deg,#ff9db4 0%, #ffcb6a 44%, #1f8690 100%); }
+  .totalCard{
+    padding-bottom:8px;
+    background:
+      radial-gradient(circle at 100% 0%, rgba(255,220,116,.18) 0 18%, transparent 40%),
+      radial-gradient(circle at 0 100%, rgba(255,255,255,.10) 0 16%, transparent 38%),
+      linear-gradient(145deg,#194e38,#0c2e23);
+    color:#fff9ea;
+  }
+  .totalCard::before{ background:linear-gradient(180deg,#ffe56e 0%, #ff9f57 44%, #50b86f 100%); }
+
+  .row{
+    display:grid;
+    grid-template-columns:130px minmax(0,1fr) 94px;
+    gap:7px;
+    align-items:center;
+  }
+  .peopleChip, .amountCard, .collectCard{
+    min-width:0;
+    min-height:var(--panel-h);
+    border-radius:18px;
+    border:1px solid var(--line);
+    background:rgba(255,255,248,.86);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.85), 0 4px 10px rgba(29,86,61,.08);
+  }
+  .peopleChip{
+    display:grid;
+    grid-template-columns:auto minmax(66px,1fr);
+    gap:6px;
+    align-items:center;
+    padding:7px;
+    background:linear-gradient(180deg, rgba(255,255,248,.96), rgba(232,249,225,.88));
+  }
+  .icon{
+    position:relative;
+    width:40px;
+    min-height:34px;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:14px;
+    font-size:18px;
+    letter-spacing:-.18em;
+    white-space:nowrap;
+    letter-spacing:-.01em;
+    cursor:pointer;
+    background:rgba(255,255,255,.34);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.58),0 2px 6px rgba(25,78,55,.08);
+    filter:drop-shadow(0 2px 2px rgba(26,83,58,.18));
+    transition:transform .08s ease, filter .12s ease, background .12s ease;
+  }
+  .iconEmoji{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    pointer-events:none;
+  }
+  .icon:active{
+    transform:scale(.94);
+    background:rgba(255,232,124,.38);
+    filter:brightness(1.06) drop-shadow(0 2px 2px rgba(26,83,58,.18));
+  }
+  .payBubble{
+    position:absolute;
+    left:50%;
+    bottom:calc(100% + 7px);
+    z-index:999;
+    transform:translate(-50%,8px) scale(.72);
+    transform-origin:50% 100%;
+    opacity:0;
+    pointer-events:none;
+    white-space:nowrap;
+    letter-spacing:.02em;
+    padding:5px 10px 4px;
+    border-radius:999px;
+    background:linear-gradient(180deg,#fffef2,#ffe889);
+    border:1px solid rgba(42,119,83,.20);
+    color:#236044;
+    font:850 11px/1 var(--sans);
+    box-shadow:0 6px 14px rgba(6,28,20,.18), inset 0 1px 0 rgba(255,255,255,.9);
+  }
+  .payBubble::after{
+    content:"";
+    position:absolute;
+    left:50%;
+    top:100%;
+    width:8px;
+    height:8px;
+    transform:translate(-50%,-3px) rotate(45deg);
+    background:#ffe889;
+    border-right:1px solid rgba(42,119,83,.16);
+    border-bottom:1px solid rgba(42,119,83,.16);
+  }
+  .icon.bubbleOn .payBubble{
+    animation:payPop 1.65s cubic-bezier(.2,1.05,.25,1) both;
+  }
+  @keyframes payPop{
+    0%{opacity:0; transform:translate(-50%,7px) scale(.68);}
+    14%{opacity:1; transform:translate(-50%,-2px) scale(1.08);}
+    24%{opacity:1; transform:translate(-50%,0) scale(1);}
+    76%{opacity:1; transform:translate(-50%,0) scale(1);}
+    100%{opacity:0; transform:translate(-50%,-9px) scale(.96);}
+  }
+  .peopleField{
+    min-width:66px;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:baseline;
+    gap:3px;
+    padding:4px 7px 3px;
+    border-radius:14px;
+    border:1px solid rgba(34,93,67,.14);
+    background:rgba(255,255,255,.72);
+  }
+  .peopleInput{
+    width:100%;
+    min-width:0;
+    border:0; outline:0; background:transparent;
+    color:var(--ink);
+    font-size:clamp(22px,5.25vw,26px);
+    font-weight:780;
+    line-height:1;
+    text-align:right;
+    caret-color:var(--leaf);
+  }
+  .unit{
+    color:#46745e;
+    font-size:11px;
+    font-weight:800;
+    white-space:nowrap;
+  }
+
+  .amountWrap{
+    display:grid;
+    grid-template-rows:auto minmax(0,1fr);
+    gap:4px;
+  }
+  .tag{
+    justify-self:start;
+    padding:3px 10px 2px;
+    border-radius:999px;
+    background:linear-gradient(180deg,#2e8d5d,#17523c);
+    color:#fff9ea;
+    border:1px solid rgba(255,255,255,.22);
+    font-size:9px;
+    line-height:1;
+    font-weight:850;
+    letter-spacing:.035em;
+    white-space:nowrap;
+  }
+  .amountCard{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:5px;
+    padding:8px 8px 7px;
+    background:linear-gradient(180deg, var(--cream), var(--sand2));
+  }
+  .moneyValue, .smallMoney{
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-size:var(--money-size);
+    font-weight:780;
+    line-height:1;
+    text-align:right;
+    letter-spacing:.005em;
+  }
+  .moneyValue{ color:var(--coral); }
+  .amountCard .unit{ font-size:11px; font-weight:850; }
+
+  .collectCard{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:4px;
+    padding:6px 4px;
+  }
+  .collectLine{
+    min-width:0;
+    display:grid;
+    grid-template-columns:1fr auto;
+    grid-template-rows:auto auto;
+    grid-template-areas:"frac frac" ". unit";
+    line-height:1;
+  }
+  .collectFrac{
+    min-width:0;
+    grid-area:frac;
+    display:flex;
+    justify-content:flex-end;
+    gap:1px;
+    font-size:clamp(9px,2.45vw,11px);
+    font-weight:850;
+    color:#2f7256;
+    white-space:nowrap;
+  }
+  .collectCard b{ color:var(--coral); }
+  .collectCard .base{ color:#5a8a72; }
+  .collectLine .unit{
+    grid-area:unit;
+    font-size:8px;
+    color:#6f9b86;
+    letter-spacing:.04em;
+  }
+
+  .barRow{
+    margin-top:5px;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:8px;
+    align-items:center;
+  }
+  .rangeWrap{ position:relative; min-width:0; height:22px; }
+  .rangeWrap.percent::before{
+    content:"";
+    position:absolute;
+    left:50%; top:50%; transform:translate(-50%,-50%);
+    width:2px; height:18px;
+    border-radius:2px;
+    background:#6f4a31;
+    box-shadow:0 0 0 2px rgba(255,250,236,.86);
+    pointer-events:none; z-index:2;
+  }
+  input[type="range"]{
+    width:100%; height:22px; margin:0;
+    appearance:none; -webkit-appearance:none;
+    background:transparent;
+    position:relative; z-index:1;
+  }
+  input[type="range"]::-webkit-slider-runnable-track{
+    height:8px; border-radius:999px;
+    background:linear-gradient(90deg,#ffe782 0%, #8dd372 50%, #29915c 100%);
+    box-shadow:inset 0 2px 4px rgba(18,59,42,.18);
+  }
+  input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance:none; appearance:none;
+    width:24px; height:24px; margin-top:-8px;
+    border-radius:50%;
+    background:linear-gradient(180deg,#fffef2,#ffd862);
+    border:3px solid #2a7753;
+    box-shadow:0 4px 10px rgba(18,59,42,.22);
+  }
+  input[type="range"]::-moz-range-track{
+    height:8px; border-radius:999px;
+    background:linear-gradient(90deg,#ffe782 0%, #8dd372 50%, #29915c 100%);
+    box-shadow:inset 0 2px 4px rgba(18,59,42,.18);
+  }
+  input[type="range"]::-moz-range-thumb{
+    width:22px; height:22px;
+    border-radius:50%;
+    background:linear-gradient(180deg,#fffef2,#ffd862);
+    border:3px solid #2a7753;
+    box-shadow:0 4px 10px rgba(18,59,42,.22);
+  }
+  .tilt{
+    padding:4px 8px 3px;
+    border-radius:999px;
+    background:linear-gradient(180deg,#ffd95d,#2a9c63);
+    color:#fff9ea;
+    font-size:10px;
+    line-height:1;
+    font-weight:900;
+    white-space:nowrap;
+  }
+
+  .totalCard .peopleChip,
+  .totalCard .collectCard{ background:rgba(255,255,255,.08); border-color:rgba(255,249,229,.12); }
+  .totalCard .peopleField{ background:rgba(255,255,255,.08); border-color:rgba(255,249,229,.12); }
+  .totalCard .unit,
+  .totalCard .collectLine .unit{ color:#d4eccd; }
+  .totalCard .peopleInput,
+  .totalCard .moneyValue,
+  .totalCard .smallMoney{ color:#fff0a6; }
+  .totalCard .collectFrac{ color:#d7efcd; }
+  .totalCard .collectCard b{ color:#ffd07a; }
+  .totalCard .collectCard .base{ color:#a5d7ae; }
+  .totalCard .amountCard{
+    background:linear-gradient(180deg,#fff9db,#ffd96b);
+  }
+  .totalCard .moneyValue{ color:#ff7b64; }
+
+  .totalAmountWrap{
+    align-self:center;
+  }
+  .totalAmountWrap .amountCard{
+    min-height:50px;
+  }
+  .totalChange{
+    justify-self:end;
+    margin-top:2px;
+    max-width:100%;
+    font-size:10px;
+    padding:3px 8px 2px;
+    opacity:.92;
+  }
+  .totalCard .row{
+    align-items:center;
+  }
+
+  .subline{
+    margin-top:5px;
+    display:flex; align-items:center; justify-content:flex-start;
+    gap:6px; min-width:0;
+  }
+  .changePill{
+    display:inline-flex; align-items:center;
+    padding:4px 10px 3px;
+    border-radius:999px;
+    background:rgba(255,230,133,.12);
+    border:1px solid rgba(255,230,133,.22);
+    color:#fff0aa;
+    font-size:10px;
+    line-height:1;
+    font-weight:900;
+    white-space:nowrap;
+  }
+
+  .roundBox{
+    padding:8px 10px 9px;
+    border-radius:22px;
+    border:1px solid rgba(255,255,255,.55);
+    background:linear-gradient(180deg, rgba(249,255,246,.98), rgba(230,249,231,.95));
+    box-shadow:0 10px 22px var(--shadow), inset 0 1px 0 rgba(255,255,255,.92);
+  }
+  .roundHead{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:4px;
+    color:#44745d; font-size:10px; font-weight:800; letter-spacing:.04em;
+  }
+  #roundNow{ color:var(--coral); font-size:var(--money-size); font-weight:800; line-height:1; }
+  .roundLabels{
+    margin-top:2px;
+    display:grid;
+    grid-template-columns:repeat(8,1fr);
+    gap:2px;
+  }
+  .roundLabels button{
+    min-width:0;
+    border:0; border-radius:10px;
+    padding:3px 0 2px;
+    background:transparent;
+    color:#3e7058;
+    font:900 9px/1 var(--digit);
+  }
+  .roundLabels button.active{
+    color:#fff9ea;
+    background:linear-gradient(180deg,#ffb25d,#28915d);
+    box-shadow:0 2px 6px rgba(18,59,42,.14);
+  }
+
+
+  .card.payActive{
+    overflow:visible;
+    z-index:18;
+    border-color:rgba(255,212,94,.92);
+    box-shadow:
+      0 0 0 3px rgba(255,212,94,.22),
+      0 14px 28px rgba(6,28,20,.26),
+      inset 0 1px 0 rgba(255,255,255,.96);
+  }
+  .icon.bubbleOn{
+    z-index:80;
+  }
+  .payEntry{
+    position:absolute;
+    left:116px;
+    right:92px;
+    top:50%;
+    z-index:5;
+    opacity:0;
+    transform:translateY(-50%) scale(.96);
+    pointer-events:none;
+    transition:opacity .15s ease, transform .15s ease;
+  }
+  .card.payActive .payEntry{
+    opacity:1;
+    transform:translateY(-50%) scale(1);
+    pointer-events:auto;
+  }
+  .nameInput{
+    width:100%;
+    height:42px;
+    border:2px solid rgba(255,212,94,.86);
+    outline:0;
+    border-radius:18px;
+    padding:6px 14px 5px;
+    background:rgba(255,255,247,.99);
+    color:#214536;
+    box-shadow:0 10px 22px rgba(6,28,20,.22), inset 0 1px 0 rgba(255,255,255,.94);
+    font:850 17px/1 var(--sans);
+    text-align:center;
+  }
+
+
+  .memoBackdrop{
+    position:fixed;
+    inset:0;
+    z-index:34;
+    background:rgba(5,26,18,.18);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .18s ease;
+  }
+  .memoBackdrop.open{
+    opacity:1;
+    pointer-events:auto;
+  }
+
+  .memoSheet{
+    position:fixed;
+    z-index:35;
+    top:0;
+    bottom:0;
+    width:min(72vw, 330px);
+    height:100svh;
+    max-height:none;
+    padding:calc(12px + env(safe-area-inset-top)) 10px calc(12px + env(safe-area-inset-bottom));
+    border:1px solid rgba(255,255,255,.62);
+    background:
+      radial-gradient(circle at 100% 0%,rgba(255,232,124,.21),transparent 34%),
+      radial-gradient(circle at 0% 100%,rgba(123,208,142,.20),transparent 34%),
+      linear-gradient(180deg,#fbfff5 0%,#eaf9e7 48%,#dcf4dc 100%);
+    box-shadow:0 18px 42px rgba(4,21,15,.38), inset 0 1px 0 rgba(255,255,255,.95);
+    overflow:hidden;
+    transition:transform .26s cubic-bezier(.18,.9,.18,1);
+    will-change:transform;
+  }
+  .memoSheet.fromLeft{
+    left:0;
+    right:auto;
+    border-radius:0 24px 24px 0;
+    transform:translateX(calc(-100% - 8px));
+  }
+  .memoSheet.fromRight{
+    right:0;
+    left:auto;
+    border-radius:24px 0 0 24px;
+    transform:translateX(calc(100% + 8px));
+  }
+  .memoSheet.open{
+    transform:translateX(0);
+  }
+  .memoHead{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    margin:-2px -2px 10px;
+    padding:2px 2px 8px;
+    position:sticky;
+    top:0;
+    z-index:2;
+    background:linear-gradient(180deg,rgba(251,255,245,.94),rgba(251,255,245,.74));
+    backdrop-filter:blur(10px);
+  }
+  .memoTitle{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:6px 12px 5px;
+    border-radius:999px;
+    background:linear-gradient(180deg,#2e8d5d,#17523c);
+    color:#fff9ea;
+    font-size:12px;
+    line-height:1;
+    font-weight:850;
+    letter-spacing:.03em;
+    box-shadow:0 4px 10px rgba(6,28,20,.14);
+  }
+  .memoClose{
+    width:34px;
+    height:34px;
+    border:0;
+    border-radius:50%;
+    background:linear-gradient(180deg,#ffe2dc,#ff917c);
+    color:#6d3126;
+    font:850 18px/1 var(--sans);
+    box-shadow:0 5px 12px rgba(6,28,20,.18);
+  }
+  .memoBody{
+    height:calc(100svh - 68px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    overflow:auto;
+    padding-right:2px;
+    -webkit-overflow-scrolling:touch;
+  }
+
+
+  .memoTotalWrap{
+    margin-bottom:10px;
+  }
+  .memoSection{
+    display:grid;
+    gap:7px;
+    margin-bottom:10px;
+    padding:7px;
+    border-radius:20px;
+    background:rgba(255,255,255,.38);
+    border:1px solid rgba(34,93,67,.11);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.58);
+  }
+
+  .memoSummary{
+    display:grid;
+    gap:7px;
+    margin-bottom:9px;
+  }
+  .memoStat{
+    display:grid;
+    grid-template-columns:42px minmax(0,1fr);
+    gap:7px;
+    align-items:center;
+    min-height:54px;
+    padding:7px;
+    border-radius:18px;
+    border:1px solid rgba(34,93,67,.13);
+    background:
+      radial-gradient(circle at 100% 0%, rgba(255,232,124,.17), transparent 40%),
+      linear-gradient(180deg,rgba(255,255,248,.90),rgba(237,250,229,.86));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.72),0 4px 10px rgba(29,86,61,.08);
+  }
+  .memoSection .memoStat{
+    border-radius:16px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.68);
+  }
+  .memoStat.total{
+    background:
+      radial-gradient(circle at 100% 0%, rgba(255,232,124,.18), transparent 40%),
+      linear-gradient(145deg,#1f5c43,#103426);
+    border-color:rgba(255,249,229,.16);
+    color:#fff9ea;
+  }
+  .memoStatIcon{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:38px;
+    border-radius:14px;
+    background:rgba(255,255,255,.42);
+    font-size:18px;
+    letter-spacing:-.16em;
+    white-space:nowrap;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.62);
+  }
+  .memoStat.total .memoStatIcon{
+    background:rgba(255,255,255,.10);
+  }
+  .memoStatNums{
+    min-width:0;
+    display:grid;
+    gap:4px;
+  }
+  .memoStatLine{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:baseline;
+    gap:4px;
+    line-height:1;
+  }
+  .memoStatFrac{
+    min-width:0;
+    display:flex;
+    justify-content:flex-end;
+    gap:3px;
+    color:#2f7256;
+    font:850 clamp(12px,3.15vw,15px)/1 var(--digit);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    letter-spacing:-.01em;
+  }
+  .memoStatFrac .paid{color:var(--coral);}
+  .memoStatFrac .due{color:#5a8a72;}
+  .memoStatLabel{
+    color:#6f9b86;
+    font-size:9px;
+    font-weight:900;
+    letter-spacing:.04em;
+    white-space:nowrap;
+  }
+  .memoStat.total .memoStatFrac{color:#d7efcd;}
+  .memoStat.total .memoStatFrac .paid{color:#ffd07a;}
+  .memoStat.total .memoStatFrac .due{color:#a5d7ae;}
+  .memoStat.total .memoStatLabel{color:#d4eccd;}
+
+  .memoGroup{
+    padding:8px 8px 9px;
+    border-radius:16px;
+    background:rgba(255,255,255,.62);
+    border:1px solid rgba(34,93,67,.12);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.68);
+  }
+  .memoGroup + .memoGroup{margin-top:7px;}
+  .memoGroupHead{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    color:#2d6c51;
+    font-size:11px;
+    line-height:1;
+    font-weight:850;
+    margin-bottom:7px;
+    padding:0 2px;
+  }
+  .memoGroupHead span:first-child{
+    display:inline-flex;
+    align-items:center;
+    min-height:20px;
+    padding:2px 8px 1px;
+    border-radius:999px;
+    background:rgba(46,141,93,.10);
+    letter-spacing:-.10em;
+  }
+  .memoGroupHead span:last-child{
+    color:#1e5f43;
+  }
+  .memoNames{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+  }
+  .memoName{
+    max-width:100%;
+    display:inline-grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:center;
+    gap:4px;
+    min-height:25px;
+    border:1px solid rgba(34,93,67,.15);
+    border-radius:999px;
+    padding:4px 5px 4px 9px;
+    background:linear-gradient(180deg,#fffef8,#edf8e6);
+    color:#214536;
+    font:850 11px/1 var(--sans);
+    box-shadow:0 2px 5px rgba(29,86,61,.06);
+  }
+  .memoName span{
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .memoName b{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:16px;
+    height:16px;
+    border-radius:50%;
+    background:#ff917c;
+    color:#fff9ea;
+    font-size:10px;
+    line-height:1;
+  }
+  .memoEmpty{
+    color:#72977f;
+    font-size:12px;
+    font-weight:900;
+    padding-left:3px;
+  }
+
+  body.naming .keypad{
+    transform:translateY(115%);
+    opacity:.15;
+    pointer-events:none;
+  }
+  body.naming{
+    padding-bottom:8px;
+  }
+  body.naming .app{
+    height:calc(100svh - 16px - env(safe-area-inset-bottom));
+  }
+
+  @media (max-width:390px){
+    .memoSheet{width:74vw;}
+    .payEntry{left:102px;right:82px;}
+    .nameInput{height:38px;font-size:15px;border-radius:16px;}
+    .payBubble{font-size:10px;padding:4px 8px 3px;}
+  }
+  @media (max-height:760px){
+    .nameInput{height:36px;font-size:15px;}
+  }
+
+  .keypad{
+    position:fixed; left:0; right:0; bottom:0;
+    z-index:20;
+    height:calc(var(--keypad-h) + env(safe-area-inset-bottom));
+    padding:7px 8px calc(7px + env(safe-area-inset-bottom));
+    background:rgba(8,40,29,.94);
+    border-top:1px solid rgba(255,255,255,.12);
+    backdrop-filter:blur(14px);
+    box-shadow:0 -12px 24px rgba(0,0,0,.24);
+    transition:transform .18s ease, opacity .18s ease;
+  }
+  .keys{
+    width:min(430px,100%); height:100%; margin:0 auto;
+    display:grid; grid-template-columns:repeat(12,1fr); gap:5px;
+  }
+  .keys button{
+    min-width:0; height:100%;
+    border:0; border-radius:16px;
+    color:var(--ink);
+    background:linear-gradient(180deg,#fff9e7,#ffe168);
+    font:850 clamp(18px,4.6vw,23px)/1 var(--digit);
+    box-shadow:0 5px 0 #2b7955, 0 9px 16px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.9);
+    transform:translateY(0) scale(1);
+    transition:transform .08s ease, box-shadow .08s ease, filter .12s ease;
+    touch-action:manipulation;
+    user-select:none; -webkit-user-select:none;
+  }
+  .keys button.press,
+  .keys button:active{
+    transform:translateY(4px) scale(.95);
+    box-shadow:0 1px 0 #2b7955, 0 5px 10px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.8);
+    filter:brightness(1.06);
+  }
+  .keys .del{ background:linear-gradient(180deg,#ffe2dc,#ff917c); color:#6d3126; }
+  .keys .enter{ background:linear-gradient(180deg,#f6f8df,#9bd58c); color:#1f5136; font-size:clamp(11px,3vw,14px); }
+
+  @media (max-width:390px){
+    :root{ --money-size:clamp(22px,5.9vw,29px); --panel-h:54px; }
+    .app{ gap:6px; }
+    .topInputs{ grid-template-columns:minmax(0,1fr) minmax(0,.82fr) 48px; gap:6px; }
+    .lockButton{min-height:64px;font-size:20px;border-radius:18px;}
+    .cards{ gap:6px; }
+    .card,.totalCard{ padding:7px; border-radius:20px; }
+    .row{ grid-template-columns:122px minmax(0,1fr) 88px; gap:5px; }
+    .totalChange{font-size:9px;padding:2px 7px 2px;}
+    .icon{ width:34px; font-size:15px; }
+    .peopleChip{ padding:6px; }
+    .peopleInput{ font-size:clamp(19px,4.9vw,23px); }
+    .collectFrac{ font-size:clamp(9px,2.45vw,11px); }
+  }
+
+  @media (max-height:760px){
+    :root{ --keypad-h:62px; --money-size:clamp(21px,5.7vw,27px); --panel-h:52px; }
+    body{ padding-top:6px; }
+    .app{ gap:5px; }
+    .topInputs{ gap:5px; }
+    .field,.roundBox{ padding:6px 9px 7px; }
+    .lockButton{min-height:58px;font-size:19px;border-radius:16px;}
+    .cards{ gap:5px; }
+    .card,.totalCard{ padding:6px; }
+    .row{ gap:5px; }
+    .barRow{ margin-top:4px; gap:6px; }
+    .tag{ padding:2px 9px 2px; font-size:8px; }
+    .totalAmountWrap .amountCard{min-height:46px;}
+    .collectCard{ padding:5px 6px; }
+    .keys{ gap:4px; }
+    .keys button{ border-radius:14px; }
+  }
+</style>
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="./favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+<link rel="manifest" href="./site.webmanifest">
+<meta name="theme-color" content="#0f3a2c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Nomikai">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+<main class="app">
+  <section class="topInputs">
+    <div class="field" id="billField">
+      <div class="fieldHeader"><span>会計額</span><span>円</span></div>
+      <input id="bill" class="moneyInput num" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="0" />
+    </div>
+    <div class="field fundField" id="fundField">
+      <div class="fieldHeader"><span>カンパ等額</span><span>円</span></div>
+      <input id="fund" class="moneyInput num" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="0" />
+    </div>
+    <button id="calcLock" class="lockButton" type="button" aria-pressed="false" aria-label="計算欄ロック">🔓</button>
+  </section>
+
+  <section class="cards">
+    <article class="card" data-group="gorilla">
+      <div class="row">
+        <div class="peopleChip">
+          <div class="icon"><span class="iconEmoji">🍺🦍</span><span class="payBubble">おしはらい！</span></div>
+          <div class="peopleField">
+            <input id="gorillaPeople" class="peopleInput num" inputmode="numeric" pattern="[0-9]*" autocomplete="off" value="0" />
+            <span class="unit">人</span>
+          </div>
+        </div>
+        <div class="amountWrap">
+          <span class="tag">1 人あたり</span>
+          <div class="amountCard"><span id="gorillaPer" class="moneyValue">0</span><span class="unit">円</span></div>
+        </div>
+        <div class="collectCard">
+          <div class="collectLine"><span class="collectFrac"><b id="gorillaPaidPeople">0</b><span>/</span><span class="base" id="gorillaDuePeople">0</span></span><span class="unit">人</span></div>
+          <div class="collectLine"><span class="collectFrac"><b id="gorillaPaidYen">0</b><span>/</span><span class="base" id="gorillaDueYen">0</span></span><span class="unit">円</span></div>
+        </div>
+      </div>
+      <div class="barRow">
+        <div class="rangeWrap percent"><input id="gorillaSlider" type="range" min="0" max="200" step="5" value="100" /></div>
+        <span id="gorillaTilt" class="tilt">100%</span>
+      </div>
+      <div class="payEntry"><input id="gorillaName" class="nameInput" inputmode="text" maxlength="10" autocomplete="off" aria-label="名前入力" /></div>
+    </article>
+
+    <article class="card" data-group="monkey">
+      <div class="row">
+        <div class="peopleChip">
+          <div class="icon"><span class="iconEmoji">🍌🐒</span><span class="payBubble">おしはらい！</span></div>
+          <div class="peopleField">
+            <input id="monkeyPeople" class="peopleInput num" inputmode="numeric" pattern="[0-9]*" autocomplete="off" value="0" />
+            <span class="unit">人</span>
+          </div>
+        </div>
+        <div class="amountWrap">
+          <span class="tag">1 人あたり</span>
+          <div class="amountCard"><span id="monkeyPer" class="moneyValue">0</span><span class="unit">円</span></div>
+        </div>
+        <div class="collectCard">
+          <div class="collectLine"><span class="collectFrac"><b id="monkeyPaidPeople">0</b><span>/</span><span class="base" id="monkeyDuePeople">0</span></span><span class="unit">人</span></div>
+          <div class="collectLine"><span class="collectFrac"><b id="monkeyPaidYen">0</b><span>/</span><span class="base" id="monkeyDueYen">0</span></span><span class="unit">円</span></div>
+        </div>
+      </div>
+      <div class="barRow">
+        <div class="rangeWrap percent"><input id="monkeySlider" type="range" min="0" max="200" step="5" value="100" /></div>
+        <span id="monkeyTilt" class="tilt">100%</span>
+      </div>
+      <div class="payEntry"><input id="monkeyName" class="nameInput" inputmode="text" maxlength="10" autocomplete="off" aria-label="名前入力" /></div>
+    </article>
+
+    <article class="card" data-group="butterfly">
+      <div class="row">
+        <div class="peopleChip">
+          <div class="icon"><span class="iconEmoji">🌺🦋</span><span class="payBubble">おしはらい！</span></div>
+          <div class="peopleField">
+            <input id="butterflyPeople" class="peopleInput num" inputmode="numeric" pattern="[0-9]*" autocomplete="off" value="0" />
+            <span class="unit">人</span>
+          </div>
+        </div>
+        <div class="amountWrap">
+          <span class="tag">1 人あたり</span>
+          <div class="amountCard"><span id="butterflyPer" class="moneyValue">0</span><span class="unit">円</span></div>
+        </div>
+        <div class="collectCard">
+          <div class="collectLine"><span class="collectFrac"><b id="butterflyPaidPeople">0</b><span>/</span><span class="base" id="butterflyDuePeople">0</span></span><span class="unit">人</span></div>
+          <div class="collectLine"><span class="collectFrac"><b id="butterflyPaidYen">0</b><span>/</span><span class="base" id="butterflyDueYen">0</span></span><span class="unit">円</span></div>
+        </div>
+      </div>
+      <div class="barRow">
+        <div class="rangeWrap percent"><input id="butterflySlider" type="range" min="0" max="200" step="5" value="0" /></div>
+        <span id="butterflyTilt" class="tilt">0%</span>
+      </div>
+      <div class="payEntry"><input id="butterflyName" class="nameInput" inputmode="text" maxlength="10" autocomplete="off" aria-label="名前入力" /></div>
+    </article>
+  </section>
+
+  <section class="totalCard">
+    <div class="row">
+      <div class="peopleChip">
+        <div class="icon">🏝️</div>
+        <div class="peopleField">
+          <span id="totalPeople" class="smallMoney">0</span>
+          <span class="unit">人</span>
+        </div>
+      </div>
+      <div class="amountWrap totalAmountWrap">
+        <span class="tag">集金済額</span>
+        <div class="amountCard"><span id="totalPaid" class="moneyValue">0</span><span class="unit">円</span></div>
+        <div id="change" class="changePill totalChange">お釣り 0 円</div>
+      </div>
+      <div class="collectCard">
+        <div class="collectLine"><span class="collectFrac"><b id="totalPaidPeople">0</b><span>/</span><span class="base" id="totalDuePeople">0</span></span><span class="unit">人</span></div>
+        <div class="collectLine"><span class="collectFrac"><b id="totalPaidYen">0</b><span>/</span><span class="base" id="totalDueYen">0</span></span><span class="unit">円</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="roundBox">
+    <div class="roundHead"><span>端数切り上げ</span><strong id="roundNow">100</strong></div>
+    <div class="rangeWrap"><input id="roundSlider" type="range" min="0" max="7" step="1" value="3" /></div>
+    <div id="roundLabels" class="roundLabels"></div>
+  </section>
+</main>
+
+
+<div id="memoBackdrop" class="memoBackdrop"></div>
+<section id="memoSheet" class="memoSheet fromLeft" aria-label="支払い済みメモ">
+  <div class="memoHead">
+    <div class="memoTitle">📝 支払い済み</div>
+    <button id="memoClose" class="memoClose" type="button">×</button>
+  </div>
+  <div id="memoBody" class="memoBody"></div>
+</section>
+
+<nav class="keypad" aria-label="数字入力">
+  <div class="keys">
+    <button type="button" data-key="1">1</button>
+    <button type="button" data-key="2">2</button>
+    <button type="button" data-key="3">3</button>
+    <button type="button" data-key="4">4</button>
+    <button type="button" data-key="5">5</button>
+    <button type="button" data-key="6">6</button>
+    <button type="button" data-key="7">7</button>
+    <button type="button" data-key="8">8</button>
+    <button type="button" data-key="9">9</button>
+    <button type="button" data-key="0">0</button>
+    <button type="button" class="del" data-key="del">⌫</button>
+    <button type="button" class="enter" data-key="enter">En</button>
+  </div>
+</nav>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const nf = new Intl.NumberFormat('ja-JP');
+  const roundValues = [1,10,50,100,500,1000,5000,10000];
+
+  const bill = $('bill');
+  const fund = $('fund');
+  const roundSlider = $('roundSlider');
+  const roundLabels = $('roundLabels');
+  const memoSheet = $('memoSheet');
+  const memoBackdrop = $('memoBackdrop');
+  const memoBody = $('memoBody');
+  const memoClose = $('memoClose');
+  const calcLock = $('calcLock');
+  let isLocked = false;
+
+  const paid = { gorilla:[], monkey:[], butterfly:[] };
+
+  const groups = [
+    {
+      key:'gorilla', icon:'🍺🦍',
+      card:document.querySelector('[data-group="gorilla"]'),
+      people:$('gorillaPeople'), slider:$('gorillaSlider'), tilt:$('gorillaTilt'),
+      per:$('gorillaPer'), duePeople:$('gorillaDuePeople'), dueYen:$('gorillaDueYen'),
+      paidPeople:$('gorillaPaidPeople'), paidYen:$('gorillaPaidYen'),
+      nameInput:$('gorillaName')
+    },
+    {
+      key:'monkey', icon:'🍌🐒',
+      card:document.querySelector('[data-group="monkey"]'),
+      people:$('monkeyPeople'), slider:$('monkeySlider'), tilt:$('monkeyTilt'),
+      per:$('monkeyPer'), duePeople:$('monkeyDuePeople'), dueYen:$('monkeyDueYen'),
+      paidPeople:$('monkeyPaidPeople'), paidYen:$('monkeyPaidYen'),
+      nameInput:$('monkeyName')
+    },
+    {
+      key:'butterfly', icon:'🌺🦋',
+      card:document.querySelector('[data-group="butterfly"]'),
+      people:$('butterflyPeople'), slider:$('butterflySlider'), tilt:$('butterflyTilt'),
+      per:$('butterflyPer'), duePeople:$('butterflyDuePeople'), dueYen:$('butterflyDueYen'),
+      paidPeople:$('butterflyPaidPeople'), paidYen:$('butterflyPaidYen'),
+      nameInput:$('butterflyName')
+    }
+  ];
+
+  const numericInputs = [bill, fund, ...groups.map(g => g.people)];
+  const lockTargets = [bill, fund, roundSlider, ...groups.flatMap(g => [g.people, g.slider])];
+  let activeInput = bill;
+  let activePayGroup = null;
+
+  function setLocked(next){
+    isLocked = next;
+    calcLock.classList.toggle('on', isLocked);
+    calcLock.textContent = isLocked ? '🔒' : '🔓';
+    calcLock.setAttribute('aria-pressed', String(isLocked));
+
+    lockTargets.forEach(el => {
+      el.disabled = isLocked;
+      const box = el.closest('.field') || el.closest('.peopleChip') || el.closest('.roundBox') || el.closest('.barRow');
+      if (box) box.classList.toggle('lockedControl', isLocked);
+    });
+
+    if (isLocked) {
+      document.querySelectorAll('.activeInput').forEach(node => node.classList.remove('activeInput'));
+      if (document.activeElement && lockTargets.includes(document.activeElement)) {
+        document.activeElement.blur();
+      }
+    }
+  }
+
+  const digits = s => String(s || '')
+    .replace(/[０-９]/g, d => String.fromCharCode(d.charCodeAt(0) - 0xFEE0))
+    .replace(/[^0-9]/g, '');
+  const num = el => Number(digits(el.value)) || 0;
+  const formatNum = n => nf.format(Math.max(0, Math.round(Number(n) || 0)));
+
+  function markActive(el){
+    activeInput = el;
+    document.querySelectorAll('.activeInput').forEach(node => node.classList.remove('activeInput'));
+    const box = el.closest('.field') || el.closest('.peopleChip');
+    if (box) box.classList.add('activeInput');
+  }
+
+  function moveCaretEnd(el){
+    setTimeout(() => {
+      try {
+        const end = String(el.value || '').length;
+        el.setSelectionRange(end, end);
+      } catch (_) {}
+    }, 0);
+  }
+
+  function formatInput(el){
+    const d = digits(el.value);
+    el.value = d ? nf.format(Number(d)) : '';
+  }
+
+  function pushDigit(current, key){
+    const trimmed = current.slice(0, 10);
+    if (key === '0' && (!trimmed || trimmed === '0')) return '0';
+    if (!trimmed || trimmed === '0') return key;
+    return (trimmed + key).slice(0, 10);
+  }
+
+  function roundUp(value, unit){
+    if (!value || value <= 0) return 0;
+    return Math.ceil(value / unit) * unit;
+  }
+
+  function openNameEntry(group){
+    groups.forEach(g => {
+      if (g !== group) {
+        commitName(g, false);
+        g.card.classList.remove('payActive');
+        g.nameInput.value = '';
+      }
+    });
+    activePayGroup = group;
+    group.card.classList.add('payActive');
+    document.body.classList.add('naming');
+
+    // アイコンタップ直後のユーザー操作内で focus することで、スマホの文字キーボードを開きやすくする
+    group.nameInput.focus({ preventScroll:true });
+    group.nameInput.select();
+  }
+
+  function closeNameEntry(group){
+    if (group) {
+      group.card.classList.remove('payActive');
+      group.nameInput.value = '';
+    }
+    activePayGroup = null;
+    document.body.classList.remove('naming');
+  }
+
+  function commitName(group, keepOpen){
+    const raw = String(group.nameInput.value || '').trim().slice(0, 10);
+    if (!raw) return false;
+    paid[group.key].push(raw);
+    group.nameInput.value = '';
+    calc();
+    renderMemo();
+    if (!keepOpen) closeNameEntry(group);
+    return true;
+  }
+
+  function calc(){
+    const gross = num(bill);
+    const contribution = num(fund);
+    const target = Math.max(gross - contribution, 0);
+    const unit = roundValues[Number(roundSlider.value)];
+
+    let weightedPeople = 0;
+    groups.forEach(g => {
+      weightedPeople += num(g.people) * (Number(g.slider.value) / 100);
+    });
+
+    const base = weightedPeople ? target / weightedPeople : 0;
+    let totalPeople = 0;
+    let totalDue = 0;
+    let collectedPeople = 0;
+    let collectedYen = 0;
+
+    groups.forEach(g => {
+      const people = num(g.people);
+      const rate = Number(g.slider.value) / 100;
+      const per = (people && rate) ? roundUp(base * rate, unit) : 0;
+      const due = per * people;
+      const doneCount = paid[g.key].length;
+      const doneYen = doneCount * per;
+
+      totalPeople += people;
+      totalDue += due;
+      collectedPeople += doneCount;
+      collectedYen += doneYen;
+
+      g.per.textContent = formatNum(per);
+      g.tilt.textContent = Math.round(rate * 100) + '%';
+      g.paidPeople.textContent = formatNum(doneCount);
+      g.paidYen.textContent = formatNum(doneYen);
+      g.duePeople.textContent = formatNum(people);
+      g.dueYen.textContent = formatNum(due);
+    });
+
+    $('totalPeople').textContent = formatNum(totalPeople);
+    $('totalPaid').textContent = formatNum(totalDue);
+    $('totalPaidPeople').textContent = formatNum(collectedPeople);
+    $('totalPaidYen').textContent = formatNum(collectedYen);
+    $('totalDuePeople').textContent = formatNum(totalPeople);
+    $('totalDueYen').textContent = formatNum(totalDue);
+    $('change').textContent = 'お釣り ' + formatNum(Math.max(totalDue - target, 0)) + ' 円';
+    $('roundNow').textContent = formatNum(unit) + ' 円';
+    [...roundLabels.children].forEach((btn, i) => btn.classList.toggle('active', i === Number(roundSlider.value)));
+    if (memoSheet && memoSheet.classList.contains('open')) renderMemo();
+  }
+
+  function makeStatCard({ icon, paidPeople, duePeople, paidYen, dueYen, total=false }){
+    const card = document.createElement('div');
+    card.className = 'memoStat' + (total ? ' total' : '');
+
+    const iconBox = document.createElement('div');
+    iconBox.className = 'memoStatIcon';
+    iconBox.textContent = icon;
+
+    const nums = document.createElement('div');
+    nums.className = 'memoStatNums';
+
+    const peopleLine = document.createElement('div');
+    peopleLine.className = 'memoStatLine';
+    peopleLine.innerHTML =
+      '<span class="memoStatFrac"><span class="paid">' + formatNum(paidPeople) + '</span><span>/</span><span class="due">' + formatNum(duePeople) + '</span></span><span class="memoStatLabel">人</span>';
+
+    const yenLine = document.createElement('div');
+    yenLine.className = 'memoStatLine';
+    yenLine.innerHTML =
+      '<span class="memoStatFrac"><span class="paid">' + formatNum(paidYen) + '</span><span>円</span><span>/</span><span class="due">' + formatNum(dueYen) + '</span><span>円</span></span><span class="memoStatLabel">回収</span>';
+
+    nums.append(peopleLine, yenLine);
+    card.append(iconBox, nums);
+    return card;
+  }
+
+  function currentGroupStats(group){
+    return {
+      icon: group.icon,
+      paidPeople: Number(String(group.paidPeople.textContent).replace(/[^0-9]/g,'')) || 0,
+      duePeople: Number(String(group.duePeople.textContent).replace(/[^0-9]/g,'')) || 0,
+      paidYen: Number(String(group.paidYen.textContent).replace(/[^0-9]/g,'')) || 0,
+      dueYen: Number(String(group.dueYen.textContent).replace(/[^0-9]/g,'')) || 0
+    };
+  }
+
+  function renderMemo(){
+    memoBody.textContent = '';
+
+    let totalPaidPeople = 0;
+    let totalDuePeople = 0;
+    let totalPaidYen = 0;
+    let totalDueYen = 0;
+
+    const cached = groups.map(group => {
+      const s = currentGroupStats(group);
+      totalPaidPeople += s.paidPeople;
+      totalDuePeople += s.duePeople;
+      totalPaidYen += s.paidYen;
+      totalDueYen += s.dueYen;
+      return { group, stats:s };
+    });
+
+    const totalWrap = document.createElement('div');
+    totalWrap.className = 'memoTotalWrap';
+    totalWrap.appendChild(makeStatCard({
+      icon:'🏝️',
+      paidPeople:totalPaidPeople,
+      duePeople:totalDuePeople,
+      paidYen:totalPaidYen,
+      dueYen:totalDueYen,
+      total:true
+    }));
+    memoBody.appendChild(totalWrap);
+
+    cached.forEach(({ group, stats }) => {
+      const block = document.createElement('div');
+      block.className = 'memoSection';
+
+      block.appendChild(makeStatCard(stats));
+
+      const section = document.createElement('section');
+      section.className = 'memoGroup';
+
+      const head = document.createElement('div');
+      head.className = 'memoGroupHead';
+
+      const title = document.createElement('span');
+      title.textContent = group.icon;
+
+      const count = document.createElement('span');
+      count.textContent = paid[group.key].length + ' 人';
+
+      head.append(title, count);
+      section.appendChild(head);
+
+      const names = document.createElement('div');
+      names.className = 'memoNames';
+
+      if (!paid[group.key].length) {
+        const empty = document.createElement('span');
+        empty.className = 'memoEmpty';
+        empty.textContent = '—';
+        names.appendChild(empty);
+      } else {
+        paid[group.key].forEach((name, index) => {
+          const chip = document.createElement('button');
+          chip.type = 'button';
+          chip.className = 'memoName';
+          chip.dataset.group = group.key;
+          chip.dataset.index = String(index);
+
+          const text = document.createElement('span');
+          text.textContent = name;
+
+          const x = document.createElement('b');
+          x.textContent = '×';
+
+          chip.append(text, x);
+          names.appendChild(chip);
+        });
+      }
+
+      section.appendChild(names);
+      block.appendChild(section);
+      memoBody.appendChild(block);
+    });
+  }
+
+  function openMemo(from){
+    renderMemo();
+    memoSheet.classList.remove('fromLeft', 'fromRight');
+    memoSheet.classList.add(from === 'right' ? 'fromRight' : 'fromLeft');
+    requestAnimationFrame(() => {
+      memoSheet.classList.add('open');
+      memoBackdrop.classList.add('open');
+    });
+  }
+  function closeMemo(){
+    memoSheet.classList.remove('open');
+    memoBackdrop.classList.remove('open');
+  }
+
+  roundValues.forEach((v, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = nf.format(v);
+    b.addEventListener('click', () => { roundSlider.value = i; calc(); });
+    roundLabels.appendChild(b);
+  });
+
+  numericInputs.forEach(el => {
+    el.addEventListener('focus', () => { markActive(el); moveCaretEnd(el); });
+    el.addEventListener('click', () => { markActive(el); moveCaretEnd(el); });
+    el.addEventListener('beforeinput', ev => { if (ev.data && /[^0-9０-９]/.test(ev.data)) ev.preventDefault(); });
+    el.addEventListener('keydown', ev => { if (ev.key === 'Enter') el.blur(); });
+    el.addEventListener('input', () => { formatInput(el); calc(); moveCaretEnd(el); });
+  });
+
+  groups.forEach(group => {
+    group.slider.addEventListener('input', calc);
+
+    const iconButton = group.card.querySelector('.icon');
+    iconButton.addEventListener('click', ev => {
+      ev.stopPropagation();
+      iconButton.classList.remove('bubbleOn');
+      void iconButton.offsetWidth;
+      iconButton.classList.add('bubbleOn');
+      openNameEntry(group);
+      setTimeout(() => iconButton.classList.remove('bubbleOn'), 1700);
+    });
+
+    group.nameInput.addEventListener('pointerdown', ev => ev.stopPropagation());
+    group.nameInput.addEventListener('keydown', ev => {
+      if (ev.key === 'Enter' && !ev.isComposing) {
+        ev.preventDefault();
+        commitName(group, true);
+      }
+      if (ev.key === 'Escape') closeNameEntry(group);
+    });
+    group.nameInput.addEventListener('blur', () => {
+      setTimeout(() => {
+        commitName(group, false);
+      }, 80);
+    });
+  });
+
+  roundSlider.addEventListener('input', calc);
+
+  memoClose.addEventListener('click', closeMemo);
+  memoBackdrop.addEventListener('click', closeMemo);
+  memoBody.addEventListener('click', ev => {
+    const chip = ev.target.closest('.memoName');
+    if (!chip) return;
+    const groupKey = chip.dataset.group;
+    const index = Number(chip.dataset.index);
+    if (Number.isInteger(index) && paid[groupKey]) {
+      paid[groupKey].splice(index, 1);
+      calc();
+      renderMemo();
+    }
+  });
+
+  let swipeStart = null;
+  document.addEventListener('pointerdown', ev => {
+    if (ev.target.closest('input, button, .memoSheet, .memoBackdrop, input[type="range"]')) return;
+    swipeStart = { x:ev.clientX, y:ev.clientY, t:performance.now() };
+  }, { passive:true });
+
+  document.addEventListener('pointerup', ev => {
+    if (!swipeStart) return;
+    const dx = ev.clientX - swipeStart.x;
+    const dy = ev.clientY - swipeStart.y;
+    const dt = performance.now() - swipeStart.t;
+    swipeStart = null;
+    if (Math.abs(dx) > 54 && Math.abs(dx) > Math.abs(dy) * 1.35 && dt < 700) {
+      // 右フリックなら左から、左フリックなら右から出す
+      openMemo(dx > 0 ? 'left' : 'right');
+    }
+  }, { passive:true });
+
+  let memoSwipe = null;
+  memoSheet.addEventListener('pointerdown', ev => {
+    memoSwipe = { x:ev.clientX, y:ev.clientY, t:performance.now() };
+  }, { passive:true });
+  memoSheet.addEventListener('pointerup', ev => {
+    if (!memoSwipe) return;
+    const dx = ev.clientX - memoSwipe.x;
+    const dy = ev.clientY - memoSwipe.y;
+    const dt = performance.now() - memoSwipe.t;
+    memoSwipe = null;
+    if (Math.abs(dx) > 54 && Math.abs(dx) > Math.abs(dy) * 1.35 && dt < 700) {
+      closeMemo();
+    }
+  }, { passive:true });
+
+  let lastKeyStamp = 0;
+  let lastKeyName = '';
+  document.querySelector('.keys').addEventListener('pointerdown', e => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    e.preventDefault();
+
+    const key = b.dataset.key;
+    const now = performance.now();
+    if (key === lastKeyName && now - lastKeyStamp < 70) return;
+    lastKeyName = key;
+    lastKeyStamp = now;
+
+    b.classList.remove('press');
+    void b.offsetWidth;
+    b.classList.add('press');
+    setTimeout(() => b.classList.remove('press'), 110);
+
+    if (!activeInput) activeInput = bill;
+    if (activeInput.disabled) return;
+    const current = digits(activeInput.value);
+
+    if (key === 'enter') {
+      activeInput.blur();
+      document.querySelectorAll('.activeInput').forEach(node => node.classList.remove('activeInput'));
+      return;
+    }
+    if (key === 'del') activeInput.value = current.slice(0, -1);
+    else activeInput.value = pushDigit(current, key);
+    formatInput(activeInput);
+    calc();
+    moveCaretEnd(activeInput);
+  }, { passive:false });
+
+  calcLock.addEventListener('click', ev => {
+    ev.stopPropagation();
+    setLocked(!isLocked);
+  });
+
+  markActive(bill);
+  setLocked(false);
+  calc();
+  renderMemo();
+})();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+</script>
+
+</body>
+</html>
