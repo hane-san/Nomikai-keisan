@@ -26,6 +26,7 @@
     --money-size:clamp(25px,6.7vw,32px);
     --keypad-h:68px;
     --panel-h:58px;
+    --top-offset:22px;
   }
 
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
@@ -33,7 +34,7 @@
   body{
     min-height:100svh;
     overflow:hidden;
-    padding:8px 8px calc(var(--keypad-h) + 8px + env(safe-area-inset-bottom));
+    padding:calc(var(--top-offset) + env(safe-area-inset-top)) 8px calc(var(--keypad-h) + 8px + env(safe-area-inset-bottom));
     color:var(--ink);
     font-family:var(--sans);
     letter-spacing:.005em;
@@ -66,7 +67,7 @@
   .app{
     position:relative; z-index:1;
     width:min(430px,100%);
-    height:calc(100svh - var(--keypad-h) - 16px - env(safe-area-inset-bottom));
+    height:calc(100svh - var(--keypad-h) - var(--top-offset) - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     margin:0 auto;
     display:grid;
     grid-template-rows:auto minmax(0,1fr) auto auto;
