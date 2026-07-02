@@ -1,0 +1,68 @@
+/* Visual rule: editable = white/dark, calculated = yellow/orange. */
+:root{
+  --editable-bg-a:#fffef8;
+  --editable-bg-b:#f6fff1;
+  --editable-ink:#1f2d26;
+  --calc-bg-a:#fff8d5;
+  --calc-bg-b:#ffe48c;
+  --calc-ink:#f06e42;
+  --calc-ink-deep:#d95d2f;
+}
+.field,
+.peopleChip,
+.peopleField,
+.roundBox{
+  background:linear-gradient(180deg,var(--editable-bg-a),var(--editable-bg-b)) !important;
+  color:var(--editable-ink) !important;
+}
+.moneyInput,
+.peopleInput,
+#roundNow{
+  color:var(--editable-ink) !important;
+}
+.fieldHeader,
+.peopleField .unit,
+.roundHead,
+.roundLabels button{
+  color:#425b4f !important;
+}
+.amountCard,
+.collectCard{
+  background:linear-gradient(180deg,var(--calc-bg-a),var(--calc-bg-b)) !important;
+  color:var(--calc-ink-deep) !important;
+}
+.moneyValue,
+.smallMoney,
+.collectFrac,
+.collectCard b,
+.collectCard .base{
+  color:var(--calc-ink) !important;
+}
+.collectLine .unit,
+.amountCard .unit{
+  color:#a76a3a !important;
+}
+.totalCard .amountCard,
+.totalCard .collectCard{
+  background:linear-gradient(180deg,#fff1ad,#ffc85f) !important;
+}
+.totalCard .moneyValue,
+.totalCard .smallMoney,
+.totalCard .collectFrac,
+.totalCard .collectCard b,
+.totalCard .collectCard .base{
+  color:#ef6b3d !important;
+}
+.totalCard .peopleChip,
+.totalCard .peopleField{
+  background:rgba(255,255,255,.14) !important;
+}
+.totalCard .peopleInput,
+.totalCard .peopleField .unit{
+  color:#fff9ea !important;
+}
+.changePill,
+.totalChange{
+  background:rgba(255,229,128,.20) !important;
+  color:#ffd782 !important;
+}
