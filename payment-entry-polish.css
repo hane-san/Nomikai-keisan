@@ -1,0 +1,67 @@
+/* Payment name entry polish. */
+.card.payActive{
+  overflow:visible !important;
+  z-index:120 !important;
+}
+.icon.bubbleOn{
+  z-index:1600 !important;
+}
+.payBubble{
+  left:28% !important;
+  bottom:calc(100% + 10px) !important;
+  z-index:2000 !important;
+  padding:6px 12px 5px !important;
+  font-size:12px !important;
+  box-shadow:0 8px 18px rgba(6,28,20,.24), inset 0 1px 0 rgba(255,255,255,.92) !important;
+}
+.payBubble::after{
+  left:66% !important;
+}
+.payEntry{
+  position:fixed !important;
+  left:50% !important;
+  right:auto !important;
+  top:42svh !important;
+  width:min(76vw, 360px) !important;
+  z-index:1500 !important;
+  transform:translate(-50%, -50%) scale(.96) !important;
+}
+.card.payActive .payEntry{
+  transform:translate(-50%, -50%) scale(1) !important;
+}
+.nameInput{
+  height:54px !important;
+  border-radius:22px !important;
+  border-width:2px !important;
+  font-size:20px !important;
+  letter-spacing:.04em !important;
+  background:linear-gradient(180deg,#fffef7,#fff8dc) !important;
+  box-shadow:0 16px 32px rgba(6,28,20,.28), 0 0 0 4px rgba(255,212,94,.22), inset 0 1px 0 rgba(255,255,255,.96) !important;
+}
+body.naming .card:not(.payActive){
+  filter:saturate(.92) brightness(.96);
+}
+@media (max-width:390px){
+  .payBubble{
+    left:24% !important;
+    font-size:11px !important;
+    padding:5px 10px 4px !important;
+  }
+  .payEntry{
+    top:39svh !important;
+    width:72vw !important;
+  }
+  .nameInput{
+    height:50px !important;
+    font-size:18px !important;
+  }
+}
+@media (max-height:760px){
+  .payEntry{
+    top:36svh !important;
+  }
+  .nameInput{
+    height:48px !important;
+    font-size:18px !important;
+  }
+}
