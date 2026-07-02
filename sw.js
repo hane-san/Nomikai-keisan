@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nomikai-keisan-v4';
+const CACHE_NAME = 'nomikai-keisan-v5';
 const ASSETS = [
   './site.webmanifest',
   './icon-192.png',
@@ -11,7 +11,9 @@ const ASSETS = [
   './layout-fix.css',
   './logic-fix.js',
   './drawer-controls.css',
-  './drawer-controls.js'
+  './drawer-controls.js',
+  './payment-entry-polish.css',
+  './payment-entry-polish.js'
 ];
 
 function withClientPatches(html) {
@@ -22,11 +24,17 @@ function withClientPatches(html) {
   if (!patched.includes('drawer-controls.css')) {
     patched = patched.replace('</head>', '<link rel="stylesheet" href="./drawer-controls.css?v=4"></head>');
   }
+  if (!patched.includes('payment-entry-polish.css')) {
+    patched = patched.replace('</head>', '<link rel="stylesheet" href="./payment-entry-polish.css?v=5"></head>');
+  }
   if (!patched.includes('logic-fix.js')) {
     patched = patched.replace('</body>', '<script src="./logic-fix.js?v=3"></script></body>');
   }
   if (!patched.includes('drawer-controls.js')) {
     patched = patched.replace('</body>', '<script src="./drawer-controls.js?v=4"></script></body>');
+  }
+  if (!patched.includes('payment-entry-polish.js')) {
+    patched = patched.replace('</body>', '<script src="./payment-entry-polish.js?v=5"></script></body>');
   }
   return patched;
 }
