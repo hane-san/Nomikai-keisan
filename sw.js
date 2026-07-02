@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nomikai-keisan-v6';
+const CACHE_NAME = 'nomikai-keisan-v7';
 const ASSETS = [
   './site.webmanifest',
   './icon-192.png',
@@ -13,7 +13,9 @@ const ASSETS = [
   './drawer-controls.css',
   './drawer-controls.js',
   './payment-entry-polish.css',
-  './payment-entry-polish.js'
+  './payment-entry-polish.js',
+  './slider-safety.css',
+  './slider-safety.js'
 ];
 
 function withClientPatches(html) {
@@ -27,6 +29,9 @@ function withClientPatches(html) {
   if (!patched.includes('payment-entry-polish.css')) {
     patched = patched.replace('</head>', '<link rel="stylesheet" href="./payment-entry-polish.css?v=5"></head>');
   }
+  if (!patched.includes('slider-safety.css')) {
+    patched = patched.replace('</head>', '<link rel="stylesheet" href="./slider-safety.css?v=7"></head>');
+  }
   if (!patched.includes('logic-fix.js')) {
     patched = patched.replace('</body>', '<script src="./logic-fix.js?v=3"></script></body>');
   }
@@ -35,6 +40,9 @@ function withClientPatches(html) {
   }
   if (!patched.includes('payment-entry-polish.js')) {
     patched = patched.replace('</body>', '<script src="./payment-entry-polish.js?v=5"></script></body>');
+  }
+  if (!patched.includes('slider-safety.js')) {
+    patched = patched.replace('</body>', '<script src="./slider-safety.js?v=7"></script></body>');
   }
   return patched;
 }
