@@ -1,0 +1,64 @@
+/* Drawer controls: easier swipe on phones, side tap rails on tablets. */
+.memoSheet{
+  transition:transform .34s cubic-bezier(.16,1.16,.22,1) !important;
+}
+.memoBackdrop{
+  transition:opacity .22s ease !important;
+}
+.drawerHotspot{
+  position:fixed;
+  z-index:33;
+  top:0;
+  bottom:0;
+  width:18px;
+  border:0;
+  padding:0;
+  margin:0;
+  background:transparent;
+  opacity:0;
+  pointer-events:auto;
+  touch-action:manipulation;
+}
+.drawerHotspot.left{left:0;}
+.drawerHotspot.right{right:0;}
+.drawerHotspot::after{
+  content:"";
+  display:none;
+}
+
+@media (min-width:700px){
+  .drawerHotspot{
+    width:max(58px, calc((100vw - 430px) / 2 + 34px));
+    opacity:1;
+  }
+  .drawerHotspot::after{
+    content:"支払い済み";
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    width:34px;
+    min-height:118px;
+    padding:12px 6px;
+    border-radius:999px;
+    color:#fff9ea;
+    background:linear-gradient(180deg,rgba(47,141,93,.86),rgba(23,82,60,.86));
+    border:1px solid rgba(255,255,255,.24);
+    box-shadow:0 10px 22px rgba(5,26,18,.22), inset 0 1px 0 rgba(255,255,255,.18);
+    writing-mode:vertical-rl;
+    letter-spacing:.08em;
+    font:850 12px/1.1 var(--sans, system-ui, sans-serif);
+  }
+  .drawerHotspot.left::after{right:8px;}
+  .drawerHotspot.right::after{left:8px;}
+}
+
+@media (min-width:980px){
+  .drawerHotspot::after{
+    width:38px;
+    min-height:132px;
+    font-size:13px;
+  }
+}
