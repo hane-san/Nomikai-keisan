@@ -3,7 +3,8 @@
   overflow:visible !important;
   z-index:120 !important;
 }
-.icon.bubbleOn{
+.icon.bubbleOn,
+.icon.paymentTapFlash{
   z-index:1600 !important;
 }
 .payBubble{
@@ -41,6 +42,47 @@
 body.naming .card:not(.payActive){
   filter:saturate(.92) brightness(.96);
 }
+.icon.paymentTapFlash,
+.card.paymentDoneFlash .peopleChip{
+  animation:paymentTapGlow .34s ease-out both;
+}
+.nameInput.paymentDoneFlash{
+  animation:nameDoneGlow .48s ease-out both;
+}
+.card.paymentDoneFlash::after{
+  content:"入力しました";
+  position:absolute;
+  left:50%;
+  top:10px;
+  z-index:1700;
+  transform:translateX(-50%);
+  padding:5px 12px 4px;
+  border-radius:999px;
+  background:linear-gradient(180deg,#fffef2,#ffe889);
+  color:#236044;
+  border:1px solid rgba(42,119,83,.18);
+  box-shadow:0 8px 18px rgba(6,28,20,.22), inset 0 1px 0 rgba(255,255,255,.94);
+  font:900 11px/1 var(--sans, system-ui, sans-serif);
+  white-space:nowrap;
+  pointer-events:none;
+  animation:doneLabel .58s ease-out both;
+}
+@keyframes paymentTapGlow{
+  0%{transform:scale(1);filter:brightness(1);}
+  35%{transform:scale(1.06);filter:brightness(1.20) drop-shadow(0 0 10px rgba(255,216,98,.65));}
+  100%{transform:scale(1);filter:brightness(1);}
+}
+@keyframes nameDoneGlow{
+  0%{box-shadow:0 16px 32px rgba(6,28,20,.28),0 0 0 4px rgba(255,212,94,.22),inset 0 1px 0 rgba(255,255,255,.96);}
+  45%{box-shadow:0 16px 32px rgba(6,28,20,.28),0 0 0 7px rgba(255,216,98,.40),0 0 20px rgba(255,216,98,.35),inset 0 1px 0 rgba(255,255,255,.96);}
+  100%{box-shadow:0 16px 32px rgba(6,28,20,.28),0 0 0 4px rgba(255,212,94,.22),inset 0 1px 0 rgba(255,255,255,.96);}
+}
+@keyframes doneLabel{
+  0%{opacity:0;transform:translate(-50%,6px) scale(.92);}
+  22%{opacity:1;transform:translate(-50%,0) scale(1.04);}
+  72%{opacity:1;transform:translate(-50%,0) scale(1);}
+  100%{opacity:0;transform:translate(-50%,-7px) scale(.96);}
+}
 @media (max-width:390px){
   .payBubble{
     left:24% !important;
@@ -54,6 +96,10 @@ body.naming .card:not(.payActive){
   .nameInput{
     height:50px !important;
     font-size:18px !important;
+  }
+  .card.paymentDoneFlash::after{
+    top:8px;
+    font-size:10px;
   }
 }
 @media (max-height:760px){
