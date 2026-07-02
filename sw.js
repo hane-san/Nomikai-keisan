@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nomikai-keisan-v3';
+const CACHE_NAME = 'nomikai-keisan-v4';
 const ASSETS = [
   './site.webmanifest',
   './icon-192.png',
@@ -9,7 +9,9 @@ const ASSETS = [
   './favicon-32.png',
   './favicon-16.png',
   './layout-fix.css',
-  './logic-fix.js'
+  './logic-fix.js',
+  './drawer-controls.css',
+  './drawer-controls.js'
 ];
 
 function withClientPatches(html) {
@@ -17,8 +19,14 @@ function withClientPatches(html) {
   if (!patched.includes('layout-fix.css')) {
     patched = patched.replace('</head>', '<link rel="stylesheet" href="./layout-fix.css?v=2"></head>');
   }
+  if (!patched.includes('drawer-controls.css')) {
+    patched = patched.replace('</head>', '<link rel="stylesheet" href="./drawer-controls.css?v=4"></head>');
+  }
   if (!patched.includes('logic-fix.js')) {
     patched = patched.replace('</body>', '<script src="./logic-fix.js?v=3"></script></body>');
+  }
+  if (!patched.includes('drawer-controls.js')) {
+    patched = patched.replace('</body>', '<script src="./drawer-controls.js?v=4"></script></body>');
   }
   return patched;
 }
