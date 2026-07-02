@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nomikai-keisan-v2';
+const CACHE_NAME = 'nomikai-keisan-v3';
 const ASSETS = [
   './site.webmanifest',
   './icon-192.png',
@@ -8,12 +8,19 @@ const ASSETS = [
   './apple-touch-icon.png',
   './favicon-32.png',
   './favicon-16.png',
-  './layout-fix.css'
+  './layout-fix.css',
+  './logic-fix.js'
 ];
 
-function withLayoutFix(html) {
-  if (html.includes('layout-fix.css')) return html;
-  return html.replace('</head>', '<link rel="stylesheet" href="./layout-fix.css?v=2"></head>');
+function withClientPatches(html) {
+  let patched = html;
+  if (!patched.includes('layout-fix.css')) {
+    patched = patched.replace('</head>', '<link rel="stylesheet" href="./layout-fix.css?v=2"></head>');
+  }
+  if (!patched.includes('logic-fix.js')) {
+    patched = patched.replace('</body>', '<script src="./logic-fix.js?v=3"></script></body>');
+  }
+  return patched;
 }
 
 self.addEventListener('install', event => {
@@ -40,7 +47,7 @@ self.addEventListener('fetch', event => {
     event.respondWith(
       fetch(event.request, { cache: 'no-store' })
         .then(response => response.text())
-        .then(html => new Response(withLayoutFix(html), {
+        .then(html => new Response(withClientPatches(html), {
           headers: { 'content-type': 'text/html; charset=utf-8' }
         }))
         .catch(() => caches.match('./index.html'))
