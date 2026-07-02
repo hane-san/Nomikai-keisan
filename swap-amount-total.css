@@ -1,0 +1,81 @@
+/* Trial: put cumulative collection status in the center, per-person amount on the right. */
+.row{
+  grid-template-columns:138px minmax(0,1fr) 94px !important;
+}
+.peopleChip{
+  grid-column:1 !important;
+}
+.collectCard{
+  grid-column:2 !important;
+  grid-row:1 !important;
+  padding:6px 8px !important;
+}
+.amountWrap{
+  grid-column:3 !important;
+  grid-row:1 !important;
+  min-width:0 !important;
+}
+.amountWrap .tag{
+  max-width:100% !important;
+  padding:2px 6px 2px !important;
+  font-size:7px !important;
+  letter-spacing:-.02em !important;
+}
+.amountCard{
+  min-width:0 !important;
+  padding:6px 5px 6px !important;
+  justify-content:center !important;
+  gap:2px !important;
+}
+.moneyValue,
+.smallMoney{
+  font-size:clamp(17px,4.25vw,22px) !important;
+  letter-spacing:-.04em !important;
+}
+.amountCard .unit{
+  font-size:8px !important;
+}
+.collectFrac{
+  justify-content:flex-end !important;
+  font-size:clamp(10px,2.85vw,13px) !important;
+  gap:2px !important;
+}
+.collectLine .unit.unitParen{
+  font-size:7.6px !important;
+}
+.totalAmountWrap .amountCard{
+  min-height:44px !important;
+}
+.totalChange{
+  font-size:8px !important;
+  padding:2px 5px 2px !important;
+}
+@media (max-width:390px){
+  .row{
+    grid-template-columns:130px minmax(0,1fr) 88px !important;
+    gap:5px !important;
+  }
+  .collectCard{
+    padding:5px 6px !important;
+  }
+  .amountWrap .tag{
+    font-size:6.6px !important;
+    padding-inline:5px !important;
+  }
+  .moneyValue,
+  .smallMoney{
+    font-size:clamp(16px,4vw,20px) !important;
+  }
+  .collectFrac{
+    font-size:clamp(9px,2.55vw,11.5px) !important;
+  }
+}
+@media (max-height:760px){
+  .moneyValue,
+  .smallMoney{
+    font-size:clamp(15px,3.85vw,19px) !important;
+  }
+  .amountWrap .tag{
+    font-size:6.3px !important;
+  }
+}
