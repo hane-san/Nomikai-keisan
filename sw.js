@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nomikai-keisan-v5';
+const CACHE_NAME = 'nomikai-keisan-v6';
 const ASSETS = [
   './site.webmanifest',
   './icon-192.png',
@@ -19,7 +19,7 @@ const ASSETS = [
 function withClientPatches(html) {
   let patched = html;
   if (!patched.includes('layout-fix.css')) {
-    patched = patched.replace('</head>', '<link rel="stylesheet" href="./layout-fix.css?v=2"></head>');
+    patched = patched.replace('</head>', '<link rel="stylesheet" href="./layout-fix.css?v=6"></head>');
   }
   if (!patched.includes('drawer-controls.css')) {
     patched = patched.replace('</head>', '<link rel="stylesheet" href="./drawer-controls.css?v=4"></head>');
