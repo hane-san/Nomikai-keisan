@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nomikai-keisan-v8';
+const CACHE_NAME = 'nomikai-keisan-v9';
 const ASSETS = [
   './site.webmanifest',
   './icon-192.png',
@@ -15,7 +15,9 @@ const ASSETS = [
   './payment-entry-polish.css',
   './payment-entry-polish.js',
   './slider-safety.css',
-  './slider-safety.js'
+  './slider-safety.js',
+  './input-state-polish.css',
+  './initial-input.js'
 ];
 
 function withClientPatches(html) {
@@ -30,7 +32,10 @@ function withClientPatches(html) {
     patched = patched.replace('</head>', '<link rel="stylesheet" href="./payment-entry-polish.css?v=8"></head>');
   }
   if (!patched.includes('slider-safety.css')) {
-    patched = patched.replace('</head>', '<link rel="stylesheet" href="./slider-safety.css?v=7"></head>');
+    patched = patched.replace('</head>', '<link rel="stylesheet" href="./slider-safety.css?v=9"></head>');
+  }
+  if (!patched.includes('input-state-polish.css')) {
+    patched = patched.replace('</head>', '<link rel="stylesheet" href="./input-state-polish.css?v=9"></head>');
   }
   if (!patched.includes('logic-fix.js')) {
     patched = patched.replace('</body>', '<script src="./logic-fix.js?v=3"></script></body>');
@@ -42,7 +47,10 @@ function withClientPatches(html) {
     patched = patched.replace('</body>', '<script src="./payment-entry-polish.js?v=8"></script></body>');
   }
   if (!patched.includes('slider-safety.js')) {
-    patched = patched.replace('</body>', '<script src="./slider-safety.js?v=7"></script></body>');
+    patched = patched.replace('</body>', '<script src="./slider-safety.js?v=9"></script></body>');
+  }
+  if (!patched.includes('initial-input.js')) {
+    patched = patched.replace('</body>', '<script src="./initial-input.js?v=9"></script></body>');
   }
   return patched;
 }
