@@ -1,5 +1,6 @@
 (() => {
-  const SAFE_HOLD_MS = 260;
+  const SAFE_HOLD_MS = 165;
+  const MOVE_TOLERANCE = 10;
   const ranges = [...document.querySelectorAll('input[type="range"]')]
     .filter(input => !input.disabled && input.id !== 'gorillaSlider');
 
@@ -18,7 +19,8 @@
     let armed = false;
     let timer = null;
     let lastValue = input.value;
-    let activePointer = null;
+    let startX = 0;
+    let startY = 0;
 
     wrap.classList.add('sliderLocked');
 
@@ -27,13 +29,12 @@
       wrap.classList.add('sliderArmed');
       wrap.classList.remove('sliderLocked');
       lastValue = input.value;
-      if (navigator.vibrate) navigator.vibrate(18);
+      if (navigator.vibrate) navigator.vibrate(12);
     }
 
     function disarm(){
       clearTimeout(timer);
       timer = null;
-      activePointer = null;
       armed = false;
       wrap.classList.remove('sliderArmed');
       wrap.classList.add('sliderLocked');
@@ -42,7 +43,8 @@
 
     input.addEventListener('pointerdown', event => {
       if (input.disabled) return;
-      activePointer = event.pointerId;
+      startX = event.clientX;
+      startY = event.clientY;
       lastValue = input.value;
       clearTimeout(timer);
       timer = setTimeout(arm, SAFE_HOLD_MS);
@@ -50,7 +52,9 @@
 
     input.addEventListener('pointermove', event => {
       if (!armed) {
-        clearTimeout(timer);
+        const dx = Math.abs(event.clientX - startX);
+        const dy = Math.abs(event.clientY - startY);
+        if (dx > MOVE_TOLERANCE || dy > MOVE_TOLERANCE) clearTimeout(timer);
         if (input.value !== lastValue) {
           input.value = lastValue;
           emitInput(input);
