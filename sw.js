@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nomikai-keisan-v7';
+const CACHE_NAME = 'nomikai-keisan-v8';
 const ASSETS = [
   './site.webmanifest',
   './icon-192.png',
@@ -27,7 +27,7 @@ function withClientPatches(html) {
     patched = patched.replace('</head>', '<link rel="stylesheet" href="./drawer-controls.css?v=4"></head>');
   }
   if (!patched.includes('payment-entry-polish.css')) {
-    patched = patched.replace('</head>', '<link rel="stylesheet" href="./payment-entry-polish.css?v=5"></head>');
+    patched = patched.replace('</head>', '<link rel="stylesheet" href="./payment-entry-polish.css?v=8"></head>');
   }
   if (!patched.includes('slider-safety.css')) {
     patched = patched.replace('</head>', '<link rel="stylesheet" href="./slider-safety.css?v=7"></head>');
@@ -39,7 +39,7 @@ function withClientPatches(html) {
     patched = patched.replace('</body>', '<script src="./drawer-controls.js?v=4"></script></body>');
   }
   if (!patched.includes('payment-entry-polish.js')) {
-    patched = patched.replace('</body>', '<script src="./payment-entry-polish.js?v=5"></script></body>');
+    patched = patched.replace('</body>', '<script src="./payment-entry-polish.js?v=8"></script></body>');
   }
   if (!patched.includes('slider-safety.js')) {
     patched = patched.replace('</body>', '<script src="./slider-safety.js?v=7"></script></body>');
