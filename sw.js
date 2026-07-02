@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nomikai-keisan-v9';
+const CACHE_NAME = 'nomikai-keisan-v10';
 const ASSETS = [
   './site.webmanifest',
   './icon-192.png',
@@ -17,7 +17,8 @@ const ASSETS = [
   './slider-safety.css',
   './slider-safety.js',
   './input-state-polish.css',
-  './initial-input.js'
+  './initial-input.js',
+  './swap-amount-total.css'
 ];
 
 function withClientPatches(html) {
@@ -36,6 +37,9 @@ function withClientPatches(html) {
   }
   if (!patched.includes('input-state-polish.css')) {
     patched = patched.replace('</head>', '<link rel="stylesheet" href="./input-state-polish.css?v=9"></head>');
+  }
+  if (!patched.includes('swap-amount-total.css')) {
+    patched = patched.replace('</head>', '<link rel="stylesheet" href="./swap-amount-total.css?v=10"></head>');
   }
   if (!patched.includes('logic-fix.js')) {
     patched = patched.replace('</body>', '<script src="./logic-fix.js?v=3"></script></body>');
