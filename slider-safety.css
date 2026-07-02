@@ -8,45 +8,12 @@ input[type="range"]{
   cursor:default;
 }
 .rangeWrap.sliderLocked input[type="range"]{
-  opacity:.72;
-}
-.rangeWrap.sliderLocked::after{
-  content:"長押し";
-  position:absolute;
-  left:50%;
-  top:50%;
-  z-index:4;
-  transform:translate(-50%,-50%);
-  padding:2px 7px 1px;
-  border-radius:999px;
-  background:rgba(33,69,54,.72);
-  color:#fff9ea;
-  font:850 8px/1 var(--sans, system-ui, sans-serif);
-  letter-spacing:.05em;
-  pointer-events:none;
-  opacity:.72;
+  opacity:.82;
 }
 .rangeWrap.sliderArmed{
   z-index:40;
   transform:scale(1.07);
   filter:drop-shadow(0 8px 14px rgba(6,28,20,.20));
-}
-.rangeWrap.sliderArmed::after{
-  content:"調整中";
-  position:absolute;
-  left:50%;
-  top:-15px;
-  z-index:5;
-  transform:translateX(-50%);
-  padding:3px 8px 2px;
-  border-radius:999px;
-  background:linear-gradient(180deg,#fffef2,#ffe889);
-  color:#236044;
-  border:1px solid rgba(42,119,83,.18);
-  font:900 9px/1 var(--sans, system-ui, sans-serif);
-  white-space:nowrap;
-  box-shadow:0 6px 12px rgba(6,28,20,.18);
-  pointer-events:none;
 }
 .rangeWrap.sliderArmed input[type="range"]::-webkit-slider-thumb{
   width:32px;
@@ -70,6 +37,5 @@ input[type="range"]{
 }
 @media (max-width:390px){
   .rangeWrap.sliderArmed{transform:scale(1.06);}
-  .rangeWrap.sliderLocked::after{font-size:7px;padding-inline:6px;}
   .collectLine .unit.unitParen{font-size:6.8px !important;}
 }
